@@ -8,9 +8,9 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/conformal/btcnet"
-	"github.com/conformal/btcscript"
-	"github.com/conformal/btcutil"
+	"github.com/hlandauf/btcnet"
+	"github.com/hlandauf/btcscript"
+	"github.com/hlandauf/btcutil"
 )
 
 // This example demonstrates creating a script which pays to a bitcoin address.

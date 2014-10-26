@@ -15,7 +15,7 @@ import (
 
 	"code.google.com/p/go.crypto/ripemd160"
 	"github.com/conformal/btcec"
-	"github.com/conformal/btcwire"
+	"github.com/hlandauf/btcwire"
 	"github.com/conformal/fastsha256"
 )
 

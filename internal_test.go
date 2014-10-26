@@ -14,8 +14,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/conformal/btcutil"
-	"github.com/conformal/btcwire"
+	"github.com/hlandauf/btcutil"
+	"github.com/hlandauf/btcwire"
 )
 
 // this file is present to export some internal interfaces so that we can
