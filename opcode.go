@@ -15,8 +15,8 @@ import (
 
 	"code.google.com/p/go.crypto/ripemd160"
 	"github.com/conformal/btcec"
-	"github.com/hlandauf/btcwire"
 	"github.com/conformal/fastsha256"
+	"github.com/hlandauf/btcwire"
 )
 
 // An opcode defines the information related to a btcscript opcode.
@@ -118,9 +118,12 @@ const (
 	OP_1NEGATE             = 79
 	OP_RESERVED            = 80
 	OP_1                   = 81 // AKA OP_TRUE
-	OP_TRUE                = 81
-	OP_2                   = 82
-	OP_3                   = 83
+	OP_TRUE                = 81 // AKA OP_NAME_NEW
+	OP_NAME_NEW            = 81
+	OP_2                   = 82 // AKA OP_NAME_FIRSTUPDATE
+	OP_NAME_FIRSTUPDATE    = 82
+	OP_3                   = 83 // AKA OP_NAME_UPDATE
+	OP_NAME_UPDATE         = 84
 	OP_4                   = 84
 	OP_5                   = 85
 	OP_6                   = 86
