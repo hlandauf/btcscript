@@ -1,6 +1,7 @@
 package btcscript
 
 import "errors"
+import "fmt"
 
 // NameScript provides information parsed from a Script. It includes the name
 // operation type, the destination address and any operation arguments.
@@ -16,12 +17,30 @@ var ErrNameNoDropDelimiter = errors.New("pk script is not a valid name script be
 var ErrNameWrongArgCount = errors.New("pk script is not a valid name script because it does not have the correct number of arguments for the given op type")
 var ErrNameUnknownOp = errors.New("pk script is not a valid name script because it has an unknown name op type")
 
+func NewNameScriptFromPk(pkScript []byte) (*NameScript, error) {
+  pk, err := parseScript(pkScript)
+  if err != nil {
+    return nil, err
+  }
+
+  return newNameScript(pk)
+}
+
 // Attempt to parse a Script in order to find name information.  If the script
 // is not a syntactically valid name script, returns an error.
 func NewNameScript(s *Script) (*NameScript, error) {
-	ns := &NameScript{}
+  ns, err := newNameScript(s.scripts[1])
+  if err != nil {
+    return nil, err
+  }
 
-	pkOpcodes := s.scripts[1]
+  ns.address = s
+
+  return ns, nil
+}
+
+func newNameScript(pkOpcodes []parsedOpcode) (*NameScript, error) {
+	ns := &NameScript{}
 
 	// Build arguments.
 
@@ -40,10 +59,16 @@ func NewNameScript(s *Script) (*NameScript, error) {
 		}
 
 		if opNum < 0 || opNum > OP_PUSHDATA4 {
-			return nil, ErrNameOpcodeOutOfRange
+      return nil, fmt.Errorf("%v: %v", ErrNameOpcodeOutOfRange, pkOpcodes[i].opcode)
 		}
 
 		ns.args = append(ns.args, string(pkOpcodes[i].data))
+	}
+
+	// No DROP/NOP opcodes were encountered before the end of the script, this is
+	// invalid.
+	if i >= len(pkOpcodes) {
+    return nil, fmt.Errorf("%v: %v", ErrNameNoDropDelimiter, dc(pkOpcodes))
 	}
 
 	// Move to after any DROP/NOP opcodes.
@@ -54,15 +79,9 @@ func NewNameScript(s *Script) (*NameScript, error) {
 		}
 	}
 
-	// No DROP/NOP opcodes were encountered before the end of the script, this is
-	// invalid.
-	if i >= len(pkOpcodes) {
-		return nil, ErrNameNoDropDelimiter
-	}
-
 	// Check that the name operation type is known and that the right number of
 	// arguments are present.
-	switch ns.op {
+	switch nameOp {
 	case OP_NAME_NEW:
 		if len(ns.args) != 1 {
 			return nil, ErrNameWrongArgCount
@@ -76,12 +95,19 @@ func NewNameScript(s *Script) (*NameScript, error) {
 			return nil, ErrNameWrongArgCount
 		}
 	default:
-		return nil, ErrNameUnknownOp
+    return nil, fmt.Errorf("%v: %d: %v", ErrNameUnknownOp, nameOp, dc(pkOpcodes))
 	}
 
 	ns.op = nameOp
-	ns.address = s
 	return ns, nil
+}
+
+func dc(pc []parsedOpcode) string {
+  s := ""
+  for _, c := range pc {
+    s += c.print(true) + " "
+  }
+  return s
 }
 
 // Returns the destination address for the script.

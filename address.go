@@ -24,6 +24,8 @@ func ExtractPkScriptAddrs(pkScript []byte, net *btcnet.Params) (ScriptClass, []b
 		return NonStandardTy, nil, 0, err
 	}
 
+  pops = skipComment(pops) // namecoin
+
 	scriptClass := typeOfScript(pops)
 	switch scriptClass {
 	case PubKeyHashTy:

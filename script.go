@@ -15,6 +15,7 @@ import (
 	"github.com/hlandauf/btcnet"
 	"github.com/hlandauf/btcutil"
 	"github.com/hlandauf/btcwire"
+	"github.com/hlandau/xlog"
 )
 
 var (
@@ -383,6 +384,27 @@ func GetScriptClass(script []byte) ScriptClass {
 	return typeOfScript(pops)
 }
 
+func skipComment(pops []parsedOpcode) []parsedOpcode {
+  items := 0
+  var i int
+  for i = 0; i < len(pops); i++ {
+    if (pops[i].opcode.value >= OP_DATA_1 && pops[i].opcode.value <= OP_PUSHDATA4) ||
+       (pops[i].opcode.value >= OP_1 && pops[i].opcode.value <= OP_16) {
+      items++
+    } else if pops[i].opcode.value == OP_DROP {
+      items--
+    } else if pops[i].opcode.value == OP_2DROP {
+      items -= 2
+    } else {
+      break
+    }
+  }
+  if items == 0 {
+    pops = pops[i:]
+  }
+  return pops
+}
+
 // scriptType returns the type of the script being inspected from the known
 // standard types.
 func typeOfScript(pops []parsedOpcode) ScriptClass {
@@ -571,7 +593,7 @@ func NewScript(scriptSig []byte, scriptPubKey []byte, txidx int, tx *btcwire.Msg
 func (s *Script) Execute() (err error) {
 	done := false
 	for done != true {
-		log.Tracef("%v", newLogClosure(func() string {
+		log.Tracef("%v", xlog.LogClosure(func() string {
 			dis, err := s.DisasmPC()
 			if err != nil {
 				return fmt.Sprintf("stepping (%v)", err)
@@ -583,7 +605,7 @@ func (s *Script) Execute() (err error) {
 		if err != nil {
 			return err
 		}
-		log.Tracef("%v", newLogClosure(func() string {
+		log.Tracef("%v", xlog.LogClosure(func() string {
 			var dstr, astr string
 
 			// if we're tracing, dump the stacks.
@@ -616,7 +638,7 @@ func (s *Script) CheckErrorCondition() (err error) {
 	v, err := s.dstack.PopBool()
 	if err == nil && v == false {
 		// log interesting data.
-		log.Tracef("%v", newLogClosure(func() string {
+		log.Tracef("%v", xlog.LogClosure(func() string {
 			dis0, _ := s.DisasmScript(0)
 			dis1, _ := s.DisasmScript(1)
 			return fmt.Sprintf("scripts failed: script0: %s\n"+

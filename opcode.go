@@ -17,6 +17,7 @@ import (
 	"github.com/conformal/btcec"
 	"github.com/conformal/fastsha256"
 	"github.com/hlandauf/btcwire"
+	"github.com/hlandau/xlog"
 )
 
 // An opcode defines the information related to a btcscript opcode.
@@ -123,7 +124,7 @@ const (
 	OP_2                   = 82 // AKA OP_NAME_FIRSTUPDATE
 	OP_NAME_FIRSTUPDATE    = 82
 	OP_3                   = 83 // AKA OP_NAME_UPDATE
-	OP_NAME_UPDATE         = 84
+	OP_NAME_UPDATE         = 83
 	OP_4                   = 84
 	OP_5                   = 85
 	OP_6                   = 86
@@ -1803,7 +1804,7 @@ func opcodeCheckSig(op *parsedOpcode, s *Script) error {
 		return nil
 	}
 
-	log.Tracef("%v", newLogClosure(func() string {
+	log.Tracef("%v", xlog.LogClosure(func() string {
 		return fmt.Sprintf("op_checksig\n"+
 			"pubKey:\n%v"+
 			"pubKey.X: %v\n"+
